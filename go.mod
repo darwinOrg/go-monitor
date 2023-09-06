@@ -1,4 +1,4 @@
-module dghire.com/libs/go-monitor
+module github.com/darwinOrg/go-monitor
 
 go 1.19
 
