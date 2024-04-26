@@ -51,14 +51,16 @@ func Start(appName string, port int) {
 		Help: "Duration of HTTP client requests.",
 	}, []string{"path", "error"})
 
-	go monitor(port)
+	ListenAndServe(port)
 }
 
-func monitor(port int) {
-	http.Handle("/monitor/prometheus", promhttp.Handler())
-	host := fmt.Sprintf(":%d", port)
-	log.Printf("start to monitor:%d....\n", port)
-	http.ListenAndServe(host, nil)
+func ListenAndServe(port int) {
+	go func() {
+		http.Handle("/monitor/prometheus", promhttp.Handler())
+		host := fmt.Sprintf(":%d", port)
+		log.Printf("start to monitor:%d....\n", port)
+		_ = http.ListenAndServe(host, nil)
+	}()
 }
 
 func HttpClientCounter(url string) {
