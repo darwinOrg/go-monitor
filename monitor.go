@@ -20,6 +20,7 @@ var ClientReqGauge *prometheus.GaugeVec
 var ClientReqDuration *prometheus.HistogramVec
 
 var counterMap = new(sync.Map)
+var name2LabelKeysMap = new(sync.Map)
 
 func Start(appName string, port int) {
 	ServerReqCounter = promauto.NewCounterVec(prometheus.CounterOpts{
@@ -87,10 +88,12 @@ func IncCounter(name string, labelMap map[string]string) error {
 	}
 
 	counter, _ := counterMap.Load(name)
+	labelValues := make([]string, 0, len(labelMap))
 	if counter == nil {
 		labelKeys := make([]string, 0, len(labelMap))
-		for labelKey := range labelMap {
+		for labelKey, labelValue := range labelMap {
 			labelKeys = append(labelKeys, labelKey)
+			labelValues = append(labelValues, labelValue)
 		}
 
 		counter = promauto.NewCounterVec(prometheus.CounterOpts{
@@ -98,12 +101,14 @@ func IncCounter(name string, labelMap map[string]string) error {
 			Help: name,
 		}, labelKeys)
 
+		name2LabelKeysMap.Store(name, labelKeys)
 		counterMap.Store(name, counter)
-	}
-
-	labelValues := make([]string, 0, len(labelMap))
-	for _, labelValue := range labelMap {
-		labelValues = append(labelValues, labelValue)
+	} else {
+		labelKeys, _ := name2LabelKeysMap.Load(name)
+		keys := labelKeys.([]string)
+		for _, labelKey := range keys {
+			labelValues = append(labelValues, labelMap[labelKey])
+		}
 	}
 
 	counter.(*prometheus.CounterVec).WithLabelValues(labelValues...).Inc()
