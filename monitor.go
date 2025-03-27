@@ -3,6 +3,7 @@ package monitor
 import (
 	"errors"
 	"fmt"
+	dgcoll "github.com/darwinOrg/go-common/collection"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -88,13 +89,12 @@ func IncCounter(name string, labelMap map[string]string) error {
 	}
 
 	counter, _ := counterMap.Load(name)
-	labelValues := make([]string, 0, len(labelMap))
 	if counter == nil {
 		labelKeys := make([]string, 0, len(labelMap))
-		for labelKey, labelValue := range labelMap {
+		for labelKey, _ := range labelMap {
 			labelKeys = append(labelKeys, labelKey)
-			labelValues = append(labelValues, labelValue)
 		}
+		dgcoll.SimpleSortAsc(labelKeys)
 
 		counter = promauto.NewCounterVec(prometheus.CounterOpts{
 			Name: name,
@@ -103,12 +103,13 @@ func IncCounter(name string, labelMap map[string]string) error {
 
 		name2LabelKeysMap.Store(name, labelKeys)
 		counterMap.Store(name, counter)
-	} else {
-		labelKeys, _ := name2LabelKeysMap.Load(name)
-		keys := labelKeys.([]string)
-		for _, labelKey := range keys {
-			labelValues = append(labelValues, labelMap[labelKey])
-		}
+	}
+
+	labelKeys, _ := name2LabelKeysMap.Load(name)
+	keys := labelKeys.([]string)
+	labelValues := make([]string, 0, len(labelMap))
+	for _, labelKey := range keys {
+		labelValues = append(labelValues, labelMap[labelKey])
 	}
 
 	counter.(*prometheus.CounterVec).WithLabelValues(labelValues...).Inc()

@@ -2,7 +2,10 @@ module github.com/darwinOrg/go-monitor
 
 go 1.23.1
 
-require github.com/prometheus/client_golang v1.21.1
+require (
+	github.com/darwinOrg/go-common v0.1.81
+	github.com/prometheus/client_golang v1.21.1
+)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
