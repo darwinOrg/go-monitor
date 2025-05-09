@@ -1,9 +1,9 @@
 package monitor
 
 import (
-	"errors"
 	"fmt"
 	dgcoll "github.com/darwinOrg/go-common/collection"
+	dgerr "github.com/darwinOrg/go-common/enums/error"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -85,7 +85,7 @@ func HttpServerDuration(url string, e string, cost int64) {
 
 func IncCounter(name string, labelMap map[string]string) error {
 	if name == "" || len(labelMap) == 0 {
-		return errors.New("invalid params")
+		return dgerr.ARGUMENT_NOT_VALID
 	}
 
 	counter, _ := counterMap.Load(name)
