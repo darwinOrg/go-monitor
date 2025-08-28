@@ -2,14 +2,15 @@ package monitor
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"sync"
+
 	dgcoll "github.com/darwinOrg/go-common/collection"
 	dgerr "github.com/darwinOrg/go-common/enums/error"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"log"
-	"net/http"
-	"sync"
 )
 
 var ServerReqCounter *prometheus.CounterVec
